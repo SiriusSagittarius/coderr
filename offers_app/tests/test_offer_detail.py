@@ -20,7 +20,8 @@ class OfferDetailTests(APITestCase):
             username="other", password="pw12345", type=User.BUSINESS,
         )
         self.offer = Offer.objects.create(user=self.owner, title="Logo Design", description="desc")
-        for offer_type, price, days in (("basic", 100, 5), ("standard", 200, 7), ("premium", 500, 10)):
+        tiers = (("basic", 100, 5), ("standard", 200, 7), ("premium", 500, 10))
+        for offer_type, price, days in tiers:
             OfferDetail.objects.create(
                 offer=self.offer, title=offer_type, revisions=2,
                 delivery_time_in_days=days, price=price, features=[], offer_type=offer_type,

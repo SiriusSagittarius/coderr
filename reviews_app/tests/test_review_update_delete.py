@@ -13,12 +13,23 @@ class ReviewUpdateDeleteTests(APITestCase):
     """Tests for PATCH/DELETE /api/reviews/{id}/."""
 
     def setUp(self):
-        self.business = User.objects.create_user(username="biz", password="pw12345", type=User.BUSINESS)
-        self.reviewer = User.objects.create_user(username="cust", password="pw12345", type=User.CUSTOMER)
-        self.other_customer = User.objects.create_user(username="cust2", password="pw12345", type=User.CUSTOMER)
-        self.review = Review.objects.create(business_user=self.business, reviewer=self.reviewer, rating=3, description="Ok")
+        self.business = User.objects.create_user(
+            username="biz", password="pw12345", type=User.BUSINESS,
+        )
+        self.reviewer = User.objects.create_user(
+            username="cust", password="pw12345", type=User.CUSTOMER,
+        )
+        self.other_customer = User.objects.create_user(
+            username="cust2", password="pw12345", type=User.CUSTOMER,
+        )
+        self.review = Review.objects.create(
+            business_user=self.business, reviewer=self.reviewer, rating=3, description="Ok",
+        )
         self.url = reverse("review-detail", args=[self.review.id])
-        self.client.credentials(HTTP_AUTHORIZATION="Token " + Token.objects.create(user=self.reviewer).key)
+        self._auth_as(self.reviewer)
+
+    def _auth_as(self, user):
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + Token.objects.create(user=user).key)
 
     def test_patch_own_review_updates_rating_and_description(self):
         response = self.client.patch(self.url, {"rating": 5, "description": "Even better!"})
@@ -30,7 +41,7 @@ class ReviewUpdateDeleteTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_patch_other_users_review_returns_403(self):
-        self.client.credentials(HTTP_AUTHORIZATION="Token " + Token.objects.create(user=self.other_customer).key)
+        self._auth_as(self.other_customer)
         response = self.client.patch(self.url, {"rating": 5})
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
@@ -45,7 +56,7 @@ class ReviewUpdateDeleteTests(APITestCase):
         self.assertFalse(Review.objects.filter(id=self.review.id).exists())
 
     def test_delete_other_users_review_returns_403(self):
-        self.client.credentials(HTTP_AUTHORIZATION="Token " + Token.objects.create(user=self.other_customer).key)
+        self._auth_as(self.other_customer)
         response = self.client.delete(self.url)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 

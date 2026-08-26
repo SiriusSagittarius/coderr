@@ -56,12 +56,16 @@ class OfferListSerializer(serializers.ModelSerializer):
         return obj.details.order_by("price").values_list("price", flat=True).first()
 
     def get_min_delivery_time(self, obj):
-        days = obj.details.order_by("delivery_time_in_days").values_list("delivery_time_in_days", flat=True)
-        return days.first()
+        days = obj.details.order_by("delivery_time_in_days")
+        return days.values_list("delivery_time_in_days", flat=True).first()
 
     def get_user_details(self, obj):
         user = obj.user
-        return {"first_name": user.first_name, "last_name": user.last_name, "username": user.username}
+        return {
+            "first_name": user.first_name,
+            "last_name": user.last_name,
+            "username": user.username,
+        }
 
 
 class OfferWriteSerializer(serializers.ModelSerializer):

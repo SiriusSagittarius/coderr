@@ -12,9 +12,15 @@ class ProfileListTests(APITestCase):
     """Tests for GET /api/profiles/business/ and /api/profiles/customer/."""
 
     def setUp(self):
-        self.business = User.objects.create_user(username="biz", password="pw12345", type=User.BUSINESS)
-        self.customer = User.objects.create_user(username="cust", password="pw12345", type=User.CUSTOMER)
-        self.client.credentials(HTTP_AUTHORIZATION="Token " + Token.objects.create(user=self.business).key)
+        self.business = User.objects.create_user(
+            username="biz", password="pw12345", type=User.BUSINESS,
+        )
+        self.customer = User.objects.create_user(
+            username="cust", password="pw12345", type=User.CUSTOMER,
+        )
+        self.client.credentials(
+            HTTP_AUTHORIZATION="Token " + Token.objects.create(user=self.business).key,
+        )
 
     def test_business_list_contains_only_business_profiles(self):
         response = self.client.get(reverse("profile-business-list"))

@@ -22,7 +22,9 @@ class Review(models.Model):
         verbose_name_plural = "Reviews"
         ordering = ["-updated_at"]
         constraints = [
-            models.UniqueConstraint(fields=["business_user", "reviewer"], name="one_review_per_business"),
+            models.UniqueConstraint(
+                fields=["business_user", "reviewer"], name="one_review_per_business",
+            ),
         ]
 
     def __str__(self):
