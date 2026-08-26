@@ -2,6 +2,7 @@
 
 Includes the admin site and the API routes contributed by each app.
 """
+# 2. Third-party
 from django.contrib import admin
 from django.urls import include, path
 
