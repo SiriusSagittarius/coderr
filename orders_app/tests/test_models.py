@@ -11,8 +11,12 @@ class OrderModelTests(TestCase):
     """Tests for the Order model."""
 
     def test_str_returns_id_and_title(self):
-        business = User.objects.create_user(username="biz", password="pw12345", type=User.BUSINESS)
-        customer = User.objects.create_user(username="cust", password="pw12345", type=User.CUSTOMER)
+        business = User.objects.create_user(
+            username="biz", password="pw12345", type=User.BUSINESS,
+        )
+        customer = User.objects.create_user(
+            username="cust", password="pw12345", type=User.CUSTOMER,
+        )
         offer = Offer.objects.create(user=business, title="Logo Design", description="desc")
         detail = OfferDetail.objects.create(
             offer=offer, title="basic", revisions=2, delivery_time_in_days=5,

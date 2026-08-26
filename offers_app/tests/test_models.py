@@ -10,7 +10,9 @@ class OfferModelTests(TestCase):
     """Tests for the Offer and OfferDetail models."""
 
     def setUp(self):
-        self.user = User.objects.create_user(username="biz", password="pw12345", type=User.BUSINESS)
+        self.user = User.objects.create_user(
+            username="biz", password="pw12345", type=User.BUSINESS,
+        )
         self.offer = Offer.objects.create(user=self.user, title="Logo Design", description="desc")
 
     def test_offer_str_returns_title(self):
