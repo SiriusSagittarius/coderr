@@ -60,7 +60,7 @@ class OfferListCreateTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn("results", response.data)
         offer = response.data["results"][0]
-        self.assertEqual(offer["min_price"], "100.00")
+        self.assertEqual(str(offer["min_price"]), "100.00")
         self.assertEqual(offer["min_delivery_time"], 5)
         self.assertEqual(len(offer["details"]), 3)
 
