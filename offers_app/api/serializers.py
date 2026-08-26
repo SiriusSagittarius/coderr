@@ -25,7 +25,8 @@ class OfferDetailLinkSerializer(serializers.ModelSerializer):
         fields = ["id", "url"]
 
     def get_url(self, obj):
-        return reverse("offerdetail-detail", args=[obj.id], request=self.context.get("request"))
+        request = self.context.get("request")
+        return reverse("offerdetail-detail", args=[obj.id], request=request)
 
 
 class UserDetailsSerializer(serializers.Serializer):
@@ -55,10 +56,12 @@ class OfferListSerializer(serializers.ModelSerializer):
         return obj.details.order_by("price").values_list("price", flat=True).first()
 
     def get_min_delivery_time(self, obj):
-        return obj.details.order_by("delivery_time_in_days").values_list("delivery_time_in_days", flat=True).first()
+        days = obj.details.order_by("delivery_time_in_days").values_list("delivery_time_in_days", flat=True)
+        return days.first()
 
     def get_user_details(self, obj):
-        return {"first_name": obj.user.first_name, "last_name": obj.user.last_name, "username": obj.user.username}
+        user = obj.user
+        return {"first_name": user.first_name, "last_name": user.last_name, "username": user.username}
 
 
 class OfferWriteSerializer(serializers.ModelSerializer):
@@ -75,14 +78,17 @@ class OfferWriteSerializer(serializers.ModelSerializer):
         if self.instance is not None:
             return value
         if len(value) != 3 or offer_types != {"basic", "standard", "premium"}:
-            raise serializers.ValidationError("An offer requires exactly one basic, standard and premium detail.")
+            raise serializers.ValidationError(
+                "An offer requires exactly one basic, standard and premium detail."
+            )
         return value
 
     def create(self, validated_data):
         details = validated_data.pop("details")
         with transaction.atomic():
             offer = Offer.objects.create(user=self.context["request"].user, **validated_data)
-            OfferDetail.objects.bulk_create([OfferDetail(offer=offer, **detail) for detail in details])
+            new_details = [OfferDetail(offer=offer, **detail) for detail in details]
+            OfferDetail.objects.bulk_create(new_details)
         return offer
 
     def update(self, instance, validated_data):
@@ -97,7 +103,9 @@ class OfferWriteSerializer(serializers.ModelSerializer):
             return
         for detail_data in details:
             detail_type = detail_data.pop("offer_type")
-            OfferDetail.objects.update_or_create(offer=instance, offer_type=detail_type, defaults=detail_data)
+            OfferDetail.objects.update_or_create(
+                offer=instance, offer_type=detail_type, defaults=detail_data,
+            )
 
     def to_representation(self, instance):
         return OfferListSerializer(instance, context=self.context).data

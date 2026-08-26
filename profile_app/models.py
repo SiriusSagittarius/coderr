@@ -6,7 +6,9 @@ from django.db import models
 class Profile(models.Model):
     """Extended, editable information about a user (customer or business)."""
 
-    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="profile")
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="profile",
+    )
     first_name = models.CharField(max_length=150, blank=True)
     last_name = models.CharField(max_length=150, blank=True)
     file = models.ImageField(upload_to="profiles/", blank=True, null=True)

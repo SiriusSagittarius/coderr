@@ -6,7 +6,9 @@ from django.db import models
 class Offer(models.Model):
     """A service offer created by a business user, consisting of 3 details."""
 
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="offers")
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="offers",
+    )
     title = models.CharField(max_length=255)
     image = models.ImageField(upload_to="offers/", blank=True, null=True)
     description = models.TextField()

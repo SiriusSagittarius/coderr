@@ -11,9 +11,15 @@ class Order(models.Model):
     CANCELLED = "cancelled"
     STATUSES = [(IN_PROGRESS, "In progress"), (COMPLETED, "Completed"), (CANCELLED, "Cancelled")]
 
-    customer_user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="customer_orders")
-    business_user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="business_orders")
-    offer_detail = models.ForeignKey("offers_app.OfferDetail", on_delete=models.PROTECT, related_name="orders")
+    customer_user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="customer_orders",
+    )
+    business_user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="business_orders",
+    )
+    offer_detail = models.ForeignKey(
+        "offers_app.OfferDetail", on_delete=models.PROTECT, related_name="orders",
+    )
     title = models.CharField(max_length=255)
     revisions = models.PositiveIntegerField()
     delivery_time_in_days = models.PositiveIntegerField()
