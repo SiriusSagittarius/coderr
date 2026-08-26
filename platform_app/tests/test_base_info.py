@@ -41,3 +41,8 @@ class BaseInfoTests(APITestCase):
     def test_base_info_does_not_require_authentication(self):
         response = self.client.get(self.url)
         self.assertNotEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_base_info_ignores_invalid_leftover_token(self):
+        self.client.credentials(HTTP_AUTHORIZATION="Token this-token-does-not-exist")
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)

@@ -33,3 +33,8 @@ class LoginTests(APITestCase):
     def test_login_missing_field_returns_400(self):
         response = self.client.post(self.url, {"username": "max"})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_login_ignores_invalid_leftover_token(self):
+        self.client.credentials(HTTP_AUTHORIZATION="Token this-token-does-not-exist")
+        response = self.client.post(self.url, {"username": "max", "password": "secret123"})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)

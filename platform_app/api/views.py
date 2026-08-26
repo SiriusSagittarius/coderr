@@ -11,8 +11,14 @@ from reviews_app.models import Review
 
 
 class BaseInfoView(APIView):
-    """Returns platform-wide statistics: reviews, average rating, businesses, offers."""
+    """Returns platform-wide statistics: reviews, average rating, businesses, offers.
 
+    Public endpoint: authentication is disabled entirely so that a stale or
+    invalid token in the caller's Authorization header cannot turn this into
+    a 401 (DRF authenticates before permissions are even checked).
+    """
+
+    authentication_classes = []
     permission_classes = [permissions.AllowAny]
 
     def get(self, request):

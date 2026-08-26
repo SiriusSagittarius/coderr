@@ -16,8 +16,14 @@ def build_auth_response(user, status_code=status.HTTP_200_OK):
 
 
 class RegistrationView(APIView):
-    """Creates a new customer or business user and returns an auth token."""
+    """Creates a new customer or business user and returns an auth token.
 
+    Public endpoint: authentication is disabled entirely so that a stale or
+    invalid token in the caller's Authorization header cannot turn this into
+    a 401 (DRF authenticates before permissions are even checked).
+    """
+
+    authentication_classes = []
     permission_classes = [permissions.AllowAny]
 
     def post(self, request):
@@ -28,8 +34,9 @@ class RegistrationView(APIView):
 
 
 class LoginView(APIView):
-    """Authenticates a user and returns an auth token."""
+    """Authenticates a user and returns an auth token. Public endpoint."""
 
+    authentication_classes = []
     permission_classes = [permissions.AllowAny]
 
     def post(self, request):

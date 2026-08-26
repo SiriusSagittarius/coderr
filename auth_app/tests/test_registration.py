@@ -50,3 +50,8 @@ class RegistrationTests(APITestCase):
         del self.payload["password"]
         response = self.client.post(self.url, self.payload)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_registration_ignores_invalid_leftover_token(self):
+        self.client.credentials(HTTP_AUTHORIZATION="Token this-token-does-not-exist")
+        response = self.client.post(self.url, self.payload)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
