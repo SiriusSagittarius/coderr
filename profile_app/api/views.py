@@ -1,6 +1,7 @@
 # 2. Third-party
 from django.shortcuts import get_object_or_404
 from rest_framework import generics
+from rest_framework.permissions import IsAuthenticated
 
 # 3. Local
 from auth_app.models import User
@@ -15,7 +16,7 @@ class ProfileDetailView(generics.RetrieveUpdateAPIView):
 
     queryset = Profile.objects.select_related("user")
     serializer_class = ProfileSerializer
-    permission_classes = [IsProfileOwner]
+    permission_classes = [IsAuthenticated & IsProfileOwner]
 
     def get_object(self):
         user = get_object_or_404(User, pk=self.kwargs["pk"])
