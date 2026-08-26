@@ -1,4 +1,4 @@
-from rest_framework.permissions import SAFE_METHODS, BasePermission
+from rest_framework.permissions import BasePermission
 
 
 class IsBusiness(BasePermission):
@@ -8,10 +8,12 @@ class IsBusiness(BasePermission):
         return bool(request.user.is_authenticated and request.user.type == "business")
 
 
-class IsOwnerOrReadOnly(BasePermission):
-    """Only the offer's creator may update or delete it."""
+class IsOwnerOrStaff(BasePermission):
+    """Only the offer's creator (or staff) may update or delete it.
+
+    Only used for write methods (PATCH/PUT/DELETE); read access is granted
+    to any authenticated user directly in OfferViewSet.get_permissions.
+    """
 
     def has_object_permission(self, request, view, obj):
-        if request.method in SAFE_METHODS:
-            return True
         return bool(request.user.is_staff or obj.user == request.user)

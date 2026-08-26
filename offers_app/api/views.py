@@ -8,7 +8,7 @@ from rest_framework.pagination import PageNumberPagination
 from offers_app.models import Offer, OfferDetail
 
 from .filters import OfferFilter
-from .permissions import IsBusiness, IsOwnerOrReadOnly
+from .permissions import IsBusiness, IsOwnerOrStaff
 from .serializers import OfferDetailSerializer, OfferListSerializer, OfferWriteSerializer
 
 
@@ -37,7 +37,7 @@ class OfferViewSet(viewsets.ModelViewSet):
         if self.request.method == "POST":
             return [permissions.IsAuthenticated(), IsBusiness()]
         if self.request.method in ("PATCH", "PUT", "DELETE"):
-            return [permissions.IsAuthenticated(), IsOwnerOrReadOnly()]
+            return [permissions.IsAuthenticated(), IsOwnerOrStaff()]
         return [permissions.IsAuthenticated()]
 
     def get_queryset(self):
