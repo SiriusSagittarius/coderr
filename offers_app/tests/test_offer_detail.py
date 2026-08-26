@@ -60,6 +60,11 @@ class OfferDetailTests(APITestCase):
         response = self.client.delete(self.url)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
+    def test_retrieve_offer_as_non_owner_is_allowed(self):
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + Token.objects.create(user=self.other_business).key)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
 
 class OfferDetailRetrieveTests(APITestCase):
     """Tests for GET /api/offerdetails/{id}/."""

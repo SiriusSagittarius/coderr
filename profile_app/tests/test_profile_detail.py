@@ -39,3 +39,9 @@ class ProfileDetailTests(APITestCase):
     def test_patch_other_users_profile_returns_403(self):
         response = self.client.patch(reverse("profile-detail", args=[self.other.id]), {"location": "Berlin"})
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_patch_own_email_updates_user_record(self):
+        response = self.client.patch(reverse("profile-detail", args=[self.owner.id]), {"email": "new@mail.de"})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.owner.refresh_from_db()
+        self.assertEqual(self.owner.email, "new@mail.de")

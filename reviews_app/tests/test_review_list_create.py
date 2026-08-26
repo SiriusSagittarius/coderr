@@ -58,3 +58,10 @@ class ReviewListCreateTests(APITestCase):
         Review.objects.create(business_user=self.business, reviewer=self.customer, rating=2, description="A")
         response = self.client.get(self.url, {"ordering": "rating"})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_list_reviews_filter_by_reviewer_id(self):
+        Review.objects.create(business_user=self.business, reviewer=self.customer, rating=5, description="A")
+        response = self.client.get(self.url, {"reviewer_id": self.customer.id})
+        self.assertEqual(len(response.data), 1)
+        response = self.client.get(self.url, {"reviewer_id": self.other_business.id})
+        self.assertEqual(len(response.data), 0)
