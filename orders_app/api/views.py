@@ -42,7 +42,8 @@ class OrderUpdateDeleteView(generics.UpdateAPIView, generics.DestroyAPIView):
 
     def partial_update(self, request, *args, **kwargs):
         if set(request.data) != {"status"}:
-            return Response({"detail": "Only the status field may be updated."}, status=status.HTTP_400_BAD_REQUEST)
+            detail = {"detail": "Only the status field may be updated."}
+            return Response(detail, status=status.HTTP_400_BAD_REQUEST)
         serializer = self.get_serializer(self.get_object(), data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
@@ -54,7 +55,9 @@ class OrderCountView(APIView):
 
     def get(self, request, business_user_id):
         get_object_or_404(User, pk=business_user_id, type=User.BUSINESS)
-        count = Order.objects.filter(business_user_id=business_user_id, status=Order.IN_PROGRESS).count()
+        count = Order.objects.filter(
+            business_user_id=business_user_id, status=Order.IN_PROGRESS,
+        ).count()
         return Response({"order_count": count})
 
 
@@ -63,5 +66,7 @@ class CompletedOrderCountView(APIView):
 
     def get(self, request, business_user_id):
         get_object_or_404(User, pk=business_user_id, type=User.BUSINESS)
-        count = Order.objects.filter(business_user_id=business_user_id, status=Order.COMPLETED).count()
+        count = Order.objects.filter(
+            business_user_id=business_user_id, status=Order.COMPLETED,
+        ).count()
         return Response({"completed_order_count": count})

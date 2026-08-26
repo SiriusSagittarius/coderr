@@ -12,7 +12,9 @@ class LoginTests(APITestCase):
 
     def setUp(self):
         self.url = reverse("login")
-        self.user = User.objects.create_user(username="max", password="secret123", email="max@mail.de")
+        self.user = User.objects.create_user(
+            username="max", password="secret123", email="max@mail.de",
+        )
 
     def test_login_success_returns_token_and_user_data(self):
         response = self.client.post(self.url, {"username": "max", "password": "secret123"})

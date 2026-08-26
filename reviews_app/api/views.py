@@ -17,7 +17,9 @@ class ReviewListCreateView(generics.ListCreateAPIView):
         queryset = Review.objects.all()
         queryset = self._filter_by_query_params(queryset)
         ordering = self.request.query_params.get("ordering")
-        return queryset.order_by(ordering if ordering in ("rating", "updated_at") else "-updated_at")
+        if ordering not in ("rating", "updated_at"):
+            ordering = "-updated_at"
+        return queryset.order_by(ordering)
 
     def _filter_by_query_params(self, queryset):
         params = self.request.query_params

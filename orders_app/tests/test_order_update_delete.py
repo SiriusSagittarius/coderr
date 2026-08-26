@@ -14,9 +14,15 @@ class OrderUpdateDeleteTests(APITestCase):
     """Tests for PATCH/DELETE /api/orders/{id}/."""
 
     def setUp(self):
-        self.business = User.objects.create_user(username="biz", password="pw12345", type=User.BUSINESS)
-        self.other_business = User.objects.create_user(username="biz2", password="pw12345", type=User.BUSINESS)
-        self.customer = User.objects.create_user(username="cust", password="pw12345", type=User.CUSTOMER)
+        self.business = User.objects.create_user(
+            username="biz", password="pw12345", type=User.BUSINESS,
+        )
+        self.other_business = User.objects.create_user(
+            username="biz2", password="pw12345", type=User.BUSINESS,
+        )
+        self.customer = User.objects.create_user(
+            username="cust", password="pw12345", type=User.CUSTOMER,
+        )
         self.staff = User.objects.create_user(username="admin", password="pw12345", is_staff=True)
         offer = Offer.objects.create(user=self.business, title="Logo Design", description="desc")
         detail = OfferDetail.objects.create(
@@ -25,7 +31,8 @@ class OrderUpdateDeleteTests(APITestCase):
         )
         self.order = Order.objects.create(
             customer_user=self.customer, business_user=self.business, offer_detail=detail,
-            title="basic", revisions=3, delivery_time_in_days=5, price=150, features=[], offer_type="basic",
+            title="basic", revisions=3, delivery_time_in_days=5,
+            price=150, features=[], offer_type="basic",
         )
         self.url = reverse("order-detail", args=[self.order.id])
 

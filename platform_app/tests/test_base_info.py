@@ -22,10 +22,16 @@ class BaseInfoTests(APITestCase):
         self.assertEqual(response.data["average_rating"], 0)
 
     def test_base_info_aggregates_correctly(self):
-        business = User.objects.create_user(username="biz", password="pw12345", type=User.BUSINESS)
-        customer = User.objects.create_user(username="cust", password="pw12345", type=User.CUSTOMER)
+        business = User.objects.create_user(
+            username="biz", password="pw12345", type=User.BUSINESS,
+        )
+        customer = User.objects.create_user(
+            username="cust", password="pw12345", type=User.CUSTOMER,
+        )
         Offer.objects.create(user=business, title="Logo", description="desc")
-        Review.objects.create(business_user=business, reviewer=customer, rating=4, description="Good")
+        Review.objects.create(
+            business_user=business, reviewer=customer, rating=4, description="Good",
+        )
         response = self.client.get(self.url)
         self.assertEqual(response.data["review_count"], 1)
         self.assertEqual(response.data["average_rating"], 4.0)

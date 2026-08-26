@@ -29,7 +29,9 @@ class OfferViewSet(viewsets.ModelViewSet):
     search_fields = ["title", "description"]
 
     def get_serializer_class(self):
-        return OfferListSerializer if self.request.method in permissions.SAFE_METHODS else OfferWriteSerializer
+        if self.request.method in permissions.SAFE_METHODS:
+            return OfferListSerializer
+        return OfferWriteSerializer
 
     def get_permissions(self):
         if self.request.method == "POST":

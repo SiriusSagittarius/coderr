@@ -20,9 +20,13 @@ class OfferListCreateTests(APITestCase):
     """Tests for GET/POST /api/offers/."""
 
     def setUp(self):
-        self.business = User.objects.create_user(username="biz", password="pw12345", type=User.BUSINESS)
-        self.customer = User.objects.create_user(username="cust", password="pw12345", type=User.CUSTOMER)
-        self.client.credentials(HTTP_AUTHORIZATION="Token " + Token.objects.create(user=self.business).key)
+        self.business = User.objects.create_user(
+            username="biz", password="pw12345", type=User.BUSINESS,
+        )
+        self.customer = User.objects.create_user(
+            username="cust", password="pw12345", type=User.CUSTOMER,
+        )
+        self._auth_as(self.business)
         self.url = reverse("offer-list")
         self.payload = {
             "title": "Graphic design package", "description": "Full package", "image": None,
@@ -33,6 +37,9 @@ class OfferListCreateTests(APITestCase):
             ],
         }
 
+    def _auth_as(self, user):
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + Token.objects.create(user=user).key)
+
     def test_create_offer_as_business_succeeds(self):
         response = self.client.post(self.url, self.payload, format="json")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -40,7 +47,7 @@ class OfferListCreateTests(APITestCase):
         self.assertEqual(OfferDetail.objects.count(), 3)
 
     def test_create_offer_as_customer_returns_403(self):
-        self.client.credentials(HTTP_AUTHORIZATION="Token " + Token.objects.create(user=self.customer).key)
+        self._auth_as(self.customer)
         response = self.client.post(self.url, self.payload, format="json")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 

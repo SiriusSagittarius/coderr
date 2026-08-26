@@ -14,8 +14,12 @@ class OrderCountTests(APITestCase):
     """Tests for GET /api/order-count/ and /api/completed-order-count/."""
 
     def setUp(self):
-        self.business = User.objects.create_user(username="biz", password="pw12345", type=User.BUSINESS)
-        self.customer = User.objects.create_user(username="cust", password="pw12345", type=User.CUSTOMER)
+        self.business = User.objects.create_user(
+            username="biz", password="pw12345", type=User.BUSINESS,
+        )
+        self.customer = User.objects.create_user(
+            username="cust", password="pw12345", type=User.CUSTOMER,
+        )
         offer = Offer.objects.create(user=self.business, title="Logo Design", description="desc")
         detail = OfferDetail.objects.create(
             offer=offer, title="basic", revisions=3, delivery_time_in_days=5,
@@ -31,7 +35,9 @@ class OrderCountTests(APITestCase):
             title="basic", revisions=3, delivery_time_in_days=5, price=150,
             features=[], offer_type="basic", status=Order.COMPLETED,
         )
-        self.client.credentials(HTTP_AUTHORIZATION="Token " + Token.objects.create(user=self.customer).key)
+        self.client.credentials(
+            HTTP_AUTHORIZATION="Token " + Token.objects.create(user=self.customer).key,
+        )
 
     def test_order_count_returns_in_progress_count(self):
         response = self.client.get(reverse("order-count", args=[self.business.id]))
