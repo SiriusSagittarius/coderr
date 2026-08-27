@@ -7,3 +7,4 @@ media/
 .vscode/
 .coverage
 htmlcov/
+.claude/
