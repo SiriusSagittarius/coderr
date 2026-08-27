@@ -84,4 +84,4 @@ and settings boilerplate).
   (see `.gitignore`); the database is regenerated locally via `migrate`.
 - CORS is restricted to `http://127.0.0.1:5500` / `http://localhost:5500`
   for local frontend development — adjust `CORS_ALLOWED_ORIGINS` in
-  `core/settings.py` for other setups.
+  `core/settings.py` for other setups..
