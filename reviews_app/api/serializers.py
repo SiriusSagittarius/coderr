@@ -32,7 +32,7 @@ class ReviewSerializer(serializers.ModelSerializer):
 
 
 class ReviewUpdateSerializer(serializers.ModelSerializer):
-    """Restricts updates to rating and description only."""
+    """Restricts writes to rating/description, but returns the full review."""
 
     class Meta:
         model = Review
@@ -42,3 +42,8 @@ class ReviewUpdateSerializer(serializers.ModelSerializer):
         if not 1 <= value <= 5:
             raise serializers.ValidationError("Rating must be between 1 and 5.")
         return value
+
+    def to_representation(self, instance):
+        # The contract expects the complete review object in the PATCH response
+        # (id, business_user, reviewer, rating, description, created_at, updated_at).
+        return ReviewSerializer(instance, context=self.context).data

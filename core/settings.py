@@ -89,6 +89,14 @@ REST_FRAMEWORK = {
     ],
 }
 
+# Serialise every DateTimeField as local-time ISO-8601 with a numeric UTC offset
+# (e.g. "2026-09-10T12:02:00.260003+02:00"), matching the API contract.
+from rest_framework.serializers import ModelSerializer  # noqa: E402
+from django.db.models import DateTimeField as _ModelDateTimeField  # noqa: E402
+from core.fields import LocalDateTimeField  # noqa: E402
+
+ModelSerializer.serializer_field_mapping[_ModelDateTimeField] = LocalDateTimeField
+
 CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:5500",
     "http://localhost:5500",

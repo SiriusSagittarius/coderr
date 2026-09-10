@@ -38,7 +38,8 @@ class OfferViewSet(viewsets.ModelViewSet):
             return [permissions.IsAuthenticated(), IsBusiness()]
         if self.request.method in ("PATCH", "PUT", "DELETE"):
             return [permissions.IsAuthenticated(), IsOwnerOrStaff()]
-        return [permissions.IsAuthenticated()]
+        # Listing/retrieving offers is public per the API contract.
+        return [permissions.AllowAny()]
 
     def get_queryset(self):
         queryset = super().get_queryset()

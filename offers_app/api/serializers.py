@@ -78,9 +78,16 @@ class OfferWriteSerializer(serializers.ModelSerializer):
         fields = ["id", "title", "image", "description", "details"]
 
     def validate_details(self, value):
-        offer_types = {item["offer_type"] for item in value}
+        # On update (PATCH) a partial set of details is allowed; each one must
+        # still carry an offer_type so we know which tier to update.
         if self.instance is not None:
+            for item in value:
+                if "offer_type" not in item:
+                    raise serializers.ValidationError(
+                        "Each detail must include an 'offer_type'."
+                    )
             return value
+        offer_types = {item.get("offer_type") for item in value}
         if len(value) != 3 or offer_types != {"basic", "standard", "premium"}:
             raise serializers.ValidationError(
                 "An offer requires exactly one basic, standard and premium detail."
@@ -112,4 +119,15 @@ class OfferWriteSerializer(serializers.ModelSerializer):
             )
 
     def to_representation(self, instance):
-        return OfferListSerializer(instance, context=self.context).data
+        """POST/PATCH return the full detail objects (id, title, price, ...),
+        unlike the list/retrieve view which only embeds {id, url} links."""
+        data = {
+            "id": instance.id,
+            "title": instance.title,
+            "image": instance.image.url if instance.image else None,
+            "description": instance.description,
+            "details": OfferDetailSerializer(
+                instance.details.all(), many=True, context=self.context,
+            ).data,
+        }
+        return data

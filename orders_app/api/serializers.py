@@ -42,4 +42,4 @@ class OrderCreateSerializer(serializers.Serializer):
         )
 
     def to_representation(self, instance):
-        return OrderSerializer(instance).data
+        return OrderSerializer(instance, context=self.context).data
