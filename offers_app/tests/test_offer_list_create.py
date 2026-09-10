@@ -1,11 +1,10 @@
 # 2. Third-party
 from django.urls import reverse
 from rest_framework import status
-from rest_framework.authtoken.models import Token
 from rest_framework.test import APITestCase
 
 # 3. Local
-from auth_app.models import User
+from core.test_utils import auth_header, make_business, make_customer
 from offers_app.models import Offer, OfferDetail
 
 
@@ -20,12 +19,8 @@ class OfferListCreateTests(APITestCase):
     """Tests for GET/POST /api/offers/."""
 
     def setUp(self):
-        self.business = User.objects.create_user(
-            username="biz", password="pw12345", type=User.BUSINESS,
-        )
-        self.customer = User.objects.create_user(
-            username="cust", password="pw12345", type=User.CUSTOMER,
-        )
+        self.business = make_business()
+        self.customer = make_customer()
         self._auth_as(self.business)
         self.url = reverse("offer-list")
         self.payload = {
@@ -38,7 +33,7 @@ class OfferListCreateTests(APITestCase):
         }
 
     def _auth_as(self, user):
-        self.client.credentials(HTTP_AUTHORIZATION="Token " + Token.objects.create(user=user).key)
+        self.client.credentials(HTTP_AUTHORIZATION=auth_header(user))
 
     def test_create_offer_as_business_succeeds(self):
         response = self.client.post(self.url, self.payload, format="json")
