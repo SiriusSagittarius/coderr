@@ -1,21 +1,26 @@
 """Project-wide DRF field overrides."""
+# 1. Standard library
+from datetime import timezone as dt_timezone
+
 # 2. Third-party
 from django.utils import timezone
 from rest_framework import serializers
 
 
 class LocalDateTimeField(serializers.DateTimeField):
-    """Serialises datetimes as local-time ISO-8601 with a real UTC offset.
+    """Serialises datetimes as ISO-8601 UTC with a trailing ``Z``.
 
-    The API contract expects timestamps like ``2026-09-10T12:02:00.260003+02:00``
-    (with a ``T`` separator, microseconds and a numeric offset, not a ``Z``).
-    DRF's default renders UTC with a ``Z``, so we convert to the active timezone
-    and emit ``datetime.isoformat()``.
+    The API contract (verified against the official Postman test runner)
+    expects timestamps like ``2026-09-10T13:55:48.148617Z`` — a ``T``
+    separator, microseconds and a ``Z`` suffix for UTC, *not* a numeric
+    ``+02:00`` offset in local time. DRF's default (with USE_TZ=True and a
+    non-UTC TIME_ZONE) renders the active timezone with an offset, so we
+    normalise to UTC and emit ``...Z``.
     """
 
     def to_representation(self, value):
         if value is None:
             return None
         if timezone.is_aware(value):
-            value = timezone.localtime(value)
-        return value.isoformat()
+            value = value.astimezone(dt_timezone.utc)
+        return value.isoformat().replace("+00:00", "Z")
