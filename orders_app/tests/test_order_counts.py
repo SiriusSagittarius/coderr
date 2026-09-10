@@ -4,7 +4,9 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 # 3. Local
-from core.test_utils import auth_header, make_business, make_customer, make_offer, make_offer_detail, make_order
+from core.test_utils import (
+    auth_header, make_business, make_customer, make_offer, make_offer_detail, make_order,
+)
 from orders_app.models import Order
 
 

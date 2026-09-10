@@ -13,12 +13,16 @@ from reviews_app.models import Review
 
 def make_business(username="biz", **kwargs):
     """Create a business-type user for tests."""
-    return User.objects.create_user(username=username, password="pw12345", type=User.BUSINESS, **kwargs)
+    return User.objects.create_user(
+        username=username, password="pw12345", type=User.BUSINESS, **kwargs,
+    )
 
 
 def make_customer(username="cust", **kwargs):
     """Create a customer-type user for tests."""
-    return User.objects.create_user(username=username, password="pw12345", type=User.CUSTOMER, **kwargs)
+    return User.objects.create_user(
+        username=username, password="pw12345", type=User.CUSTOMER, **kwargs,
+    )
 
 
 def make_offer(user, title="Logo Design", description="desc"):

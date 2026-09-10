@@ -4,7 +4,9 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 # 3. Local
-from core.test_utils import auth_header, make_business, make_offer, make_offer_detail, make_offer_with_tiers
+from core.test_utils import (
+    auth_header, make_business, make_offer, make_offer_detail, make_offer_with_tiers,
+)
 from offers_app.models import Offer
 
 
@@ -68,7 +70,9 @@ class OfferDetailRetrieveTests(APITestCase):
 
     def setUp(self):
         user = make_business(username="owner")
-        self.detail = make_offer_detail(make_offer(user), price=100, revisions=2, features=["Logo"])
+        self.detail = make_offer_detail(
+            make_offer(user), price=100, revisions=2, features=["Logo"],
+        )
         self.client.credentials(HTTP_AUTHORIZATION=auth_header(user))
 
     def test_retrieve_offer_detail_returns_data(self):
