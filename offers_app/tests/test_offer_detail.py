@@ -1,36 +1,25 @@
 # 2. Third-party
 from django.urls import reverse
 from rest_framework import status
-from rest_framework.authtoken.models import Token
 from rest_framework.test import APITestCase
 
 # 3. Local
-from auth_app.models import User
-from offers_app.models import Offer, OfferDetail
+from core.test_utils import auth_header, make_business, make_offer, make_offer_detail, make_offer_with_tiers
+from offers_app.models import Offer
 
 
 class OfferDetailTests(APITestCase):
     """Tests for GET/PATCH/DELETE /api/offers/{id}/."""
 
     def setUp(self):
-        self.owner = User.objects.create_user(
-            username="owner", password="pw12345", type=User.BUSINESS,
-        )
-        self.other_business = User.objects.create_user(
-            username="other", password="pw12345", type=User.BUSINESS,
-        )
-        self.offer = Offer.objects.create(user=self.owner, title="Logo Design", description="desc")
-        tiers = (("basic", 100, 5), ("standard", 200, 7), ("premium", 500, 10))
-        for offer_type, price, days in tiers:
-            OfferDetail.objects.create(
-                offer=self.offer, title=offer_type, revisions=2,
-                delivery_time_in_days=days, price=price, features=[], offer_type=offer_type,
-            )
+        self.owner = make_business(username="owner")
+        self.other_business = make_business(username="other")
+        self.offer = make_offer_with_tiers(self.owner)
         self._auth_as(self.owner)
         self.url = reverse("offer-detail", args=[self.offer.id])
 
     def _auth_as(self, user):
-        self.client.credentials(HTTP_AUTHORIZATION="Token " + Token.objects.create(user=user).key)
+        self.client.credentials(HTTP_AUTHORIZATION=auth_header(user))
 
     def test_retrieve_offer_returns_full_data(self):
         response = self.client.get(self.url)
@@ -78,15 +67,9 @@ class OfferDetailRetrieveTests(APITestCase):
     """Tests for GET /api/offerdetails/{id}/."""
 
     def setUp(self):
-        user = User.objects.create_user(username="owner", password="pw12345", type=User.BUSINESS)
-        offer = Offer.objects.create(user=user, title="Logo Design", description="desc")
-        self.detail = OfferDetail.objects.create(
-            offer=offer, title="basic", revisions=2, delivery_time_in_days=5,
-            price=100, features=["Logo"], offer_type="basic",
-        )
-        self.client.credentials(
-            HTTP_AUTHORIZATION="Token " + Token.objects.create(user=user).key,
-        )
+        user = make_business(username="owner")
+        self.detail = make_offer_detail(make_offer(user), price=100, revisions=2, features=["Logo"])
+        self.client.credentials(HTTP_AUTHORIZATION=auth_header(user))
 
     def test_retrieve_offer_detail_returns_data(self):
         response = self.client.get(reverse("offerdetail-detail", args=[self.detail.id]))

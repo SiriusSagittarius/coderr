@@ -1,11 +1,10 @@
 # 2. Third-party
 from django.urls import reverse
 from rest_framework import status
-from rest_framework.authtoken.models import Token
 from rest_framework.test import APITestCase
 
 # 3. Local
-from auth_app.models import User
+from core.test_utils import auth_header, make_business, make_customer, make_review
 from reviews_app.models import Review
 
 
@@ -13,23 +12,15 @@ class ReviewUpdateDeleteTests(APITestCase):
     """Tests for PATCH/DELETE /api/reviews/{id}/."""
 
     def setUp(self):
-        self.business = User.objects.create_user(
-            username="biz", password="pw12345", type=User.BUSINESS,
-        )
-        self.reviewer = User.objects.create_user(
-            username="cust", password="pw12345", type=User.CUSTOMER,
-        )
-        self.other_customer = User.objects.create_user(
-            username="cust2", password="pw12345", type=User.CUSTOMER,
-        )
-        self.review = Review.objects.create(
-            business_user=self.business, reviewer=self.reviewer, rating=3, description="Ok",
-        )
+        self.business = make_business()
+        self.reviewer = make_customer()
+        self.other_customer = make_customer(username="cust2")
+        self.review = make_review(self.business, self.reviewer)
         self.url = reverse("review-detail", args=[self.review.id])
         self._auth_as(self.reviewer)
 
     def _auth_as(self, user):
-        self.client.credentials(HTTP_AUTHORIZATION="Token " + Token.objects.create(user=user).key)
+        self.client.credentials(HTTP_AUTHORIZATION=auth_header(user))
 
     def test_patch_own_review_updates_rating_and_description(self):
         response = self.client.patch(self.url, {"rating": 5, "description": "Even better!"})

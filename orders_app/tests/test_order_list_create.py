@@ -1,12 +1,10 @@
 # 2. Third-party
 from django.urls import reverse
 from rest_framework import status
-from rest_framework.authtoken.models import Token
 from rest_framework.test import APITestCase
 
 # 3. Local
-from auth_app.models import User
-from offers_app.models import Offer, OfferDetail
+from core.test_utils import auth_header, make_business, make_customer, make_offer, make_offer_detail
 from orders_app.models import Order
 
 
@@ -14,25 +12,15 @@ class OrderListCreateTests(APITestCase):
     """Tests for GET/POST /api/orders/."""
 
     def setUp(self):
-        self.business = User.objects.create_user(
-            username="biz", password="pw12345", type=User.BUSINESS,
-        )
-        self.customer = User.objects.create_user(
-            username="cust", password="pw12345", type=User.CUSTOMER,
-        )
-        self.other_customer = User.objects.create_user(
-            username="cust2", password="pw12345", type=User.CUSTOMER,
-        )
-        offer = Offer.objects.create(user=self.business, title="Logo Design", description="desc")
-        self.detail = OfferDetail.objects.create(
-            offer=offer, title="basic", revisions=3, delivery_time_in_days=5,
-            price=150, features=["Logo Design"], offer_type="basic",
-        )
+        self.business = make_business()
+        self.customer = make_customer()
+        self.other_customer = make_customer(username="cust2")
+        self.detail = make_offer_detail(make_offer(self.business), features=["Logo Design"])
         self._auth_as(self.customer)
         self.url = reverse("order-list")
 
     def _auth_as(self, user):
-        self.client.credentials(HTTP_AUTHORIZATION="Token " + Token.objects.create(user=user).key)
+        self.client.credentials(HTTP_AUTHORIZATION=auth_header(user))
 
     def test_create_order_as_customer_succeeds(self):
         response = self.client.post(self.url, {"offer_detail_id": self.detail.id})
