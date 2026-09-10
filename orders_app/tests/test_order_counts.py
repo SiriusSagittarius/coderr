@@ -1,12 +1,10 @@
 # 2. Third-party
 from django.urls import reverse
 from rest_framework import status
-from rest_framework.authtoken.models import Token
 from rest_framework.test import APITestCase
 
 # 3. Local
-from auth_app.models import User
-from offers_app.models import Offer, OfferDetail
+from core.test_utils import auth_header, make_business, make_customer, make_offer, make_offer_detail, make_order
 from orders_app.models import Order
 
 
@@ -14,30 +12,12 @@ class OrderCountTests(APITestCase):
     """Tests for GET /api/order-count/ and /api/completed-order-count/."""
 
     def setUp(self):
-        self.business = User.objects.create_user(
-            username="biz", password="pw12345", type=User.BUSINESS,
-        )
-        self.customer = User.objects.create_user(
-            username="cust", password="pw12345", type=User.CUSTOMER,
-        )
-        offer = Offer.objects.create(user=self.business, title="Logo Design", description="desc")
-        detail = OfferDetail.objects.create(
-            offer=offer, title="basic", revisions=3, delivery_time_in_days=5,
-            price=150, features=[], offer_type="basic",
-        )
-        Order.objects.create(
-            customer_user=self.customer, business_user=self.business, offer_detail=detail,
-            title="basic", revisions=3, delivery_time_in_days=5, price=150,
-            features=[], offer_type="basic", status=Order.IN_PROGRESS,
-        )
-        Order.objects.create(
-            customer_user=self.customer, business_user=self.business, offer_detail=detail,
-            title="basic", revisions=3, delivery_time_in_days=5, price=150,
-            features=[], offer_type="basic", status=Order.COMPLETED,
-        )
-        self.client.credentials(
-            HTTP_AUTHORIZATION="Token " + Token.objects.create(user=self.customer).key,
-        )
+        self.business = make_business()
+        self.customer = make_customer()
+        detail = make_offer_detail(make_offer(self.business))
+        make_order(self.customer, self.business, detail, status=Order.IN_PROGRESS)
+        make_order(self.customer, self.business, detail, status=Order.COMPLETED)
+        self.client.credentials(HTTP_AUTHORIZATION=auth_header(self.customer))
 
     def test_order_count_returns_in_progress_count(self):
         response = self.client.get(reverse("order-count", args=[self.business.id]))

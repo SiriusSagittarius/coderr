@@ -1,43 +1,27 @@
 # 2. Third-party
 from django.urls import reverse
 from rest_framework import status
-from rest_framework.authtoken.models import Token
 from rest_framework.test import APITestCase
 
 # 3. Local
 from auth_app.models import User
-from offers_app.models import Offer, OfferDetail
-from orders_app.models import Order
+from core.test_utils import auth_header, make_business, make_customer, make_offer, make_offer_detail, make_order
 
 
 class OrderUpdateDeleteTests(APITestCase):
     """Tests for PATCH/DELETE /api/orders/{id}/."""
 
     def setUp(self):
-        self.business = User.objects.create_user(
-            username="biz", password="pw12345", type=User.BUSINESS,
-        )
-        self.other_business = User.objects.create_user(
-            username="biz2", password="pw12345", type=User.BUSINESS,
-        )
-        self.customer = User.objects.create_user(
-            username="cust", password="pw12345", type=User.CUSTOMER,
-        )
+        self.business = make_business()
+        self.other_business = make_business(username="biz2")
+        self.customer = make_customer()
         self.staff = User.objects.create_user(username="admin", password="pw12345", is_staff=True)
-        offer = Offer.objects.create(user=self.business, title="Logo Design", description="desc")
-        detail = OfferDetail.objects.create(
-            offer=offer, title="basic", revisions=3, delivery_time_in_days=5,
-            price=150, features=[], offer_type="basic",
-        )
-        self.order = Order.objects.create(
-            customer_user=self.customer, business_user=self.business, offer_detail=detail,
-            title="basic", revisions=3, delivery_time_in_days=5,
-            price=150, features=[], offer_type="basic",
-        )
+        detail = make_offer_detail(make_offer(self.business))
+        self.order = make_order(self.customer, self.business, detail)
         self.url = reverse("order-detail", args=[self.order.id])
 
     def _auth_as(self, user):
-        self.client.credentials(HTTP_AUTHORIZATION="Token " + Token.objects.create(user=user).key)
+        self.client.credentials(HTTP_AUTHORIZATION=auth_header(user))
 
     def test_patch_status_as_business_owner_succeeds(self):
         self._auth_as(self.business)
