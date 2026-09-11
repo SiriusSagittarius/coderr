@@ -89,8 +89,8 @@ REST_FRAMEWORK = {
     ],
 }
 
-# Serialise every DateTimeField as local-time ISO-8601 with a numeric UTC offset
-# (e.g. "2026-09-10T12:02:00.260003+02:00"), matching the API contract.
+# Serialise every DateTimeField as UTC ISO-8601 with a trailing "Z"
+# (e.g. "2026-09-10T13:55:48.148617Z"), matching the API contract.
 from rest_framework.serializers import ModelSerializer  # noqa: E402
 from django.db.models import DateTimeField as _ModelDateTimeField  # noqa: E402
 from core.fields import LocalDateTimeField  # noqa: E402
