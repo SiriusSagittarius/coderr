@@ -1,7 +1,5 @@
-# 2. Third-party
 from rest_framework import serializers
 
-# 3. Local
 from offers_app.models import OfferDetail
 from orders_app.models import Order
 
@@ -28,6 +26,7 @@ class OrderCreateSerializer(serializers.Serializer):
     offer_detail_id = serializers.PrimaryKeyRelatedField(queryset=OfferDetail.objects.all())
 
     def create(self, validated_data):
+        """Create and return a new instance from the validated data."""
         detail = validated_data["offer_detail_id"]
         return Order.objects.create(
             customer_user=self.context["request"].user,
@@ -42,4 +41,5 @@ class OrderCreateSerializer(serializers.Serializer):
         )
 
     def to_representation(self, instance):
+        """Return the serialized output representation of the instance."""
         return OrderSerializer(instance, context=self.context).data

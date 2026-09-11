@@ -9,4 +9,5 @@ class ProfileAppConfig(AppConfig):
     verbose_name = "Profiles"
 
     def ready(self):
+        """Import signal handlers so they are registered on app startup."""
         from . import signals  # noqa: F401

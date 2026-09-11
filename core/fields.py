@@ -1,8 +1,6 @@
 """Project-wide DRF field overrides."""
-# 1. Standard library
 from datetime import timezone as dt_timezone
 
-# 2. Third-party
 from django.utils import timezone
 from rest_framework import serializers
 
@@ -19,6 +17,7 @@ class LocalDateTimeField(serializers.DateTimeField):
     """
 
     def to_representation(self, value):
+        """Return the serialized output representation of the instance."""
         if value is None:
             return None
         if timezone.is_aware(value):

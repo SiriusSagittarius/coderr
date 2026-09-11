@@ -1,7 +1,5 @@
-# 2. Third-party
 from django.test import TestCase
 
-# 3. Local
 from auth_app.models import User
 from reviews_app.models import Review
 
@@ -10,6 +8,7 @@ class ReviewModelTests(TestCase):
     """Tests for the Review model."""
 
     def test_str_returns_reviewer_business_and_rating(self):
+        """Str returns reviewer business and rating."""
         business = User.objects.create_user(
             username="biz", password="pw12345", type=User.BUSINESS,
         )

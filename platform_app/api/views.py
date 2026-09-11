@@ -1,10 +1,8 @@
-# 2. Third-party
 from django.db.models import Avg, Count
 from rest_framework import permissions
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-# 3. Local
 from auth_app.models import User
 from offers_app.models import Offer
 from reviews_app.models import Review
@@ -22,6 +20,7 @@ class BaseInfoView(APIView):
     permission_classes = [permissions.AllowAny]
 
     def get(self, request):
+        """Handle the GET request and return the response."""
         stats = Review.objects.aggregate(review_count=Count("id"), average_rating=Avg("rating"))
         data = {
             "review_count": stats["review_count"],

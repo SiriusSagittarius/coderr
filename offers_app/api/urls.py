@@ -1,8 +1,6 @@
-# 2. Third-party
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
-# 3. Local
 from .views import OfferDetailRetrieveView, OfferViewSet
 
 router = DefaultRouter()

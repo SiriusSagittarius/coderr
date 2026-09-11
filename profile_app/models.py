@@ -1,4 +1,3 @@
-# 2. Third-party
 from django.conf import settings
 from django.db import models
 
@@ -24,4 +23,5 @@ class Profile(models.Model):
         ordering = ["user__username"]
 
     def __str__(self):
+        """Return a human-readable representation of the object."""
         return f"Profile of {self.user.username}"

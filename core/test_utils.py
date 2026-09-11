@@ -1,10 +1,5 @@
-# 1. Standard library
-# (none)
-
-# 2. Third-party
 from rest_framework.authtoken.models import Token
 
-# 3. Local
 from auth_app.models import User
 from offers_app.models import Offer, OfferDetail
 from orders_app.models import Order

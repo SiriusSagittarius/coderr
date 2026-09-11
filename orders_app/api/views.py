@@ -1,11 +1,9 @@
-# 2. Third-party
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-# 3. Local
 from auth_app.models import User
 from orders_app.models import Order
 
@@ -17,13 +15,16 @@ class OrderListCreateView(generics.ListCreateAPIView):
     """Lists the authenticated user's orders, or creates a new one."""
 
     def get_queryset(self):
+        """Return the queryset of objects visible to this request."""
         user = self.request.user
         return Order.objects.filter(Q(customer_user=user) | Q(business_user=user))
 
     def get_serializer_class(self):
+        """Return the serializer class for the current request method."""
         return OrderCreateSerializer if self.request.method == "POST" else OrderSerializer
 
     def get_permissions(self):
+        """Return the permission instances for the current request method."""
         if self.request.method == "POST":
             return [permissions.IsAuthenticated(), IsCustomer()]
         return [permissions.IsAuthenticated()]
@@ -36,11 +37,13 @@ class OrderUpdateDeleteView(generics.UpdateAPIView, generics.DestroyAPIView):
     serializer_class = OrderSerializer
 
     def get_permissions(self):
+        """Return the permission instances for the current request method."""
         if self.request.method == "DELETE":
             return [permissions.IsAuthenticated(), permissions.IsAdminUser()]
         return [permissions.IsAuthenticated(), IsBusinessOwner()]
 
     def partial_update(self, request, *args, **kwargs):
+        """Partially update the object, restricting which fields may change."""
         if set(request.data) != {"status"}:
             detail = {"detail": "Only the status field may be updated."}
             return Response(detail, status=status.HTTP_400_BAD_REQUEST)
@@ -54,6 +57,7 @@ class OrderCountView(APIView):
     """Returns the number of in-progress orders for a business user."""
 
     def get(self, request, business_user_id):
+        """Handle the GET request and return the response."""
         get_object_or_404(User, pk=business_user_id, type=User.BUSINESS)
         count = Order.objects.filter(
             business_user_id=business_user_id, status=Order.IN_PROGRESS,
@@ -65,6 +69,7 @@ class CompletedOrderCountView(APIView):
     """Returns the number of completed orders for a business user."""
 
     def get(self, request, business_user_id):
+        """Handle the GET request and return the response."""
         get_object_or_404(User, pk=business_user_id, type=User.BUSINESS)
         count = Order.objects.filter(
             business_user_id=business_user_id, status=Order.COMPLETED,

@@ -1,10 +1,8 @@
-# 2. Third-party
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import generics, permissions, viewsets
 from rest_framework.filters import SearchFilter
 from rest_framework.pagination import PageNumberPagination
 
-# 3. Local
 from offers_app.models import Offer, OfferDetail
 
 from .filters import OfferFilter
@@ -29,11 +27,13 @@ class OfferViewSet(viewsets.ModelViewSet):
     search_fields = ["title", "description"]
 
     def get_serializer_class(self):
+        """Return the serializer class for the current request method."""
         if self.request.method in permissions.SAFE_METHODS:
             return OfferListSerializer
         return OfferWriteSerializer
 
     def get_permissions(self):
+        """Return the permission instances for the current request method."""
         if self.request.method == "POST":
             return [permissions.IsAuthenticated(), IsBusiness()]
         if self.request.method in ("PATCH", "PUT", "DELETE"):
@@ -45,6 +45,7 @@ class OfferViewSet(viewsets.ModelViewSet):
         return [permissions.AllowAny()]
 
     def get_queryset(self):
+        """Return the queryset of objects visible to this request."""
         queryset = super().get_queryset()
         ordering = self.request.query_params.get("ordering")
         if ordering in ("updated_at", "-updated_at"):

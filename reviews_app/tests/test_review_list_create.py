@@ -1,10 +1,8 @@
-# 2. Third-party
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APITestCase
 
-# 3. Local
 from auth_app.models import User
 from reviews_app.models import Review
 
@@ -13,6 +11,7 @@ class ReviewListCreateTests(APITestCase):
     """Tests for GET/POST /api/reviews/."""
 
     def setUp(self):
+        """Set up the objects shared by the tests in this case."""
         self.business = User.objects.create_user(
             username="biz", password="pw12345", type=User.BUSINESS,
         )
@@ -26,37 +25,44 @@ class ReviewListCreateTests(APITestCase):
         self.url = reverse("review-list")
 
     def _auth_as(self, user):
+        """Authenticate the test client as the given user."""
         self.client.credentials(HTTP_AUTHORIZATION="Token " + Token.objects.create(user=user).key)
 
     def test_create_review_as_customer_succeeds(self):
+        """Create review as customer succeeds."""
         payload = {"business_user": self.business.id, "rating": 4, "description": "Great!"}
         response = self.client.post(self.url, payload)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data["reviewer"], self.customer.id)
 
     def test_create_review_as_business_returns_403(self):
+        """Create review as business returns 403."""
         self._auth_as(self.business)
         payload = {"business_user": self.other_business.id, "rating": 4, "description": "Great!"}
         response = self.client.post(self.url, payload)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_create_duplicate_review_returns_400(self):
+        """Create duplicate review returns 400."""
         payload = {"business_user": self.business.id, "rating": 4, "description": "Great!"}
         self.client.post(self.url, payload)
         response = self.client.post(self.url, payload)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_create_review_invalid_rating_returns_400(self):
+        """Create review invalid rating returns 400."""
         payload = {"business_user": self.business.id, "rating": 9, "description": "Great!"}
         response = self.client.post(self.url, payload)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_list_reviews_requires_authentication(self):
+        """List reviews requires authentication."""
         self.client.credentials()
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_list_reviews_filter_by_business_user_id(self):
+        """List reviews filter by business user id."""
         Review.objects.create(
             business_user=self.business, reviewer=self.customer, rating=5, description="A",
         )
@@ -66,6 +72,7 @@ class ReviewListCreateTests(APITestCase):
         self.assertEqual(len(response.data), 0)
 
     def test_list_reviews_ordering_by_rating(self):
+        """List reviews ordering by rating."""
         Review.objects.create(
             business_user=self.business, reviewer=self.customer, rating=2, description="A",
         )
@@ -73,6 +80,7 @@ class ReviewListCreateTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_list_reviews_filter_by_reviewer_id(self):
+        """List reviews filter by reviewer id."""
         Review.objects.create(
             business_user=self.business, reviewer=self.customer, rating=5, description="A",
         )

@@ -1,9 +1,7 @@
-# 2. Third-party
 from django.db import transaction
 from rest_framework import serializers
 from rest_framework.reverse import reverse
 
-# 3. Local
 from offers_app.models import Offer, OfferDetail
 
 
@@ -25,6 +23,7 @@ class OfferDetailLinkSerializer(serializers.ModelSerializer):
         fields = ["id", "url"]
 
     def get_url(self, obj):
+        """Return the url for the serialized object."""
         request = self.context.get("request")
         return reverse("offerdetail-detail", args=[obj.id], request=request)
 
@@ -53,13 +52,16 @@ class OfferListSerializer(serializers.ModelSerializer):
         ]
 
     def get_min_price(self, obj):
+        """Return the min price for the serialized object."""
         return obj.details.order_by("price").values_list("price", flat=True).first()
 
     def get_min_delivery_time(self, obj):
+        """Return the min delivery time for the serialized object."""
         days = obj.details.order_by("delivery_time_in_days")
         return days.values_list("delivery_time_in_days", flat=True).first()
 
     def get_user_details(self, obj):
+        """Return the user details for the serialized object."""
         user = obj.user
         return {
             "first_name": user.first_name,
@@ -80,6 +82,7 @@ class OfferWriteSerializer(serializers.ModelSerializer):
     def validate_details(self, value):
         # On update (PATCH) a partial set of details is allowed; each one must
         # still carry an offer_type so we know which tier to update.
+        """Validate the 'details' field."""
         if self.instance is not None:
             for item in value:
                 if "offer_type" not in item:
@@ -95,6 +98,7 @@ class OfferWriteSerializer(serializers.ModelSerializer):
         return value
 
     def create(self, validated_data):
+        """Create and return a new instance from the validated data."""
         details = validated_data.pop("details")
         with transaction.atomic():
             offer = Offer.objects.create(user=self.context["request"].user, **validated_data)
@@ -103,6 +107,7 @@ class OfferWriteSerializer(serializers.ModelSerializer):
         return offer
 
     def update(self, instance, validated_data):
+        """Apply the validated data to the existing instance and return it."""
         details = validated_data.pop("details", None)
         with transaction.atomic():
             instance = super().update(instance, validated_data)
@@ -110,6 +115,7 @@ class OfferWriteSerializer(serializers.ModelSerializer):
         return instance
 
     def _update_details(self, instance, details):
+        """Helper: update details."""
         if details is None:
             return
         for detail_data in details:

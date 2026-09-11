@@ -2,7 +2,8 @@
 
 Includes the admin site and the API routes contributed by each app.
 """
-# 2. Third-party
+from django.conf import settings
+from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
 
@@ -15,3 +16,7 @@ urlpatterns = [
     path("api/", include("reviews_app.api.urls")),
     path("api/", include("platform_app.api.urls")),
 ]
+
+# Serve uploaded media files (profile images, offer images) during development.
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -1,9 +1,7 @@
-# 2. Third-party
 from django.shortcuts import get_object_or_404
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
 
-# 3. Local
 from auth_app.models import User
 from profile_app.models import Profile
 
@@ -19,6 +17,7 @@ class ProfileDetailView(generics.RetrieveUpdateAPIView):
     permission_classes = [IsAuthenticated & IsProfileOwner]
 
     def get_object(self):
+        """Return the object for this request, enforcing object permissions."""
         user = get_object_or_404(User, pk=self.kwargs["pk"])
         profile = get_object_or_404(Profile, user=user)
         self.check_object_permissions(self.request, profile)
@@ -31,6 +30,7 @@ class BusinessProfileListView(generics.ListAPIView):
     serializer_class = BusinessProfileSerializer
 
     def get_queryset(self):
+        """Return the queryset of objects visible to this request."""
         return Profile.objects.select_related("user").filter(user__type=User.BUSINESS)
 
 
@@ -40,4 +40,5 @@ class CustomerProfileListView(generics.ListAPIView):
     serializer_class = CustomerProfileSerializer
 
     def get_queryset(self):
+        """Return the queryset of objects visible to this request."""
         return Profile.objects.select_related("user").filter(user__type=User.CUSTOMER)

@@ -5,6 +5,7 @@ class IsBusiness(BasePermission):
     """Only business users may create offers."""
 
     def has_permission(self, request, view):
+        """Return whether the request is allowed at the view level."""
         return bool(request.user.is_authenticated and request.user.type == "business")
 
 
@@ -16,4 +17,5 @@ class IsOwnerOrStaff(BasePermission):
     """
 
     def has_object_permission(self, request, view, obj):
+        """Return whether the request is allowed on this object."""
         return bool(request.user.is_staff or obj.user == request.user)

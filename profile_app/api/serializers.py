@@ -1,7 +1,5 @@
-# 2. Third-party
 from rest_framework import serializers
 
-# 3. Local
 from profile_app.models import Profile
 
 
@@ -26,11 +24,13 @@ class ProfileSerializer(serializers.ModelSerializer):
         read_only_fields = ["created_at"]
 
     def update(self, instance, validated_data):
+        """Apply the validated data to the existing instance and return it."""
         user_data = validated_data.pop("user", {})
         self._update_user_email(instance, user_data)
         return super().update(instance, validated_data)
 
     def _update_user_email(self, instance, user_data):
+        """Helper: update user email."""
         if "email" in user_data:
             instance.user.email = user_data["email"]
             instance.user.save(update_fields=["email"])

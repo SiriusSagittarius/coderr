@@ -1,4 +1,3 @@
-# 2. Third-party
 from django.conf import settings
 from django.db import models
 
@@ -28,4 +27,5 @@ class Review(models.Model):
         ]
 
     def __str__(self):
+        """Return a human-readable representation of the object."""
         return f"{self.reviewer.username} -> {self.business_user.username}: {self.rating}"

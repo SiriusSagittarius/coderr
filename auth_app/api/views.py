@@ -1,10 +1,8 @@
-# 2. Third-party
 from rest_framework import permissions, status
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-# 3. Local
 from .serializers import LoginSerializer, RegistrationSerializer
 
 
@@ -27,6 +25,7 @@ class RegistrationView(APIView):
     permission_classes = [permissions.AllowAny]
 
     def post(self, request):
+        """Handle the POST request and return the response."""
         serializer = RegistrationSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
@@ -40,6 +39,7 @@ class LoginView(APIView):
     permission_classes = [permissions.AllowAny]
 
     def post(self, request):
+        """Handle the POST request and return the response."""
         serializer = LoginSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         return build_auth_response(serializer.validated_data["user"])

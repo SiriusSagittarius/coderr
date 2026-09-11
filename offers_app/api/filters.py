@@ -1,7 +1,5 @@
-# 2. Third-party
 import django_filters
 
-# 3. Local
 from offers_app.models import Offer
 
 

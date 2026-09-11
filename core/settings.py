@@ -1,5 +1,4 @@
 """Django settings for the core project."""
-# 1. Standard library
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent

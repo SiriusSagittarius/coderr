@@ -1,4 +1,3 @@
-# 2. Third-party
 from django.conf import settings
 from django.db import models
 
@@ -21,6 +20,7 @@ class Offer(models.Model):
         ordering = ["-created_at"]
 
     def __str__(self):
+        """Return a human-readable representation of the object."""
         return self.title
 
 
@@ -46,4 +46,5 @@ class OfferDetail(models.Model):
         ordering = ["price"]
 
     def __str__(self):
+        """Return a human-readable representation of the object."""
         return f"{self.offer.title} - {self.offer_type}"
