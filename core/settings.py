@@ -1,11 +1,36 @@
 """Django settings for the core project."""
+import os
 from pathlib import Path
+
+from django.core.exceptions import ImproperlyConfigured
+from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = "dev-only-change-me"
-DEBUG = True
-ALLOWED_HOSTS = ["*"]
+# Load environment variables from a .env file if one exists (used in production;
+# locally it is optional and the safe defaults below apply).
+load_dotenv(BASE_DIR / ".env")
+
+
+def env_bool(name, default):
+    """Read a boolean environment variable ("true"/"1"/"yes" => True)."""
+    return os.getenv(name, str(default)).strip().lower() in ("1", "true", "yes", "on")
+
+
+def env_list(name, default=""):
+    """Read a comma-separated environment variable into a list of strings."""
+    return [item.strip() for item in os.getenv(name, default).split(",") if item.strip()]
+
+
+DEBUG = env_bool("DEBUG", True)
+
+# In development a throwaway key is fine; in production SECRET_KEY must come from
+# the environment, otherwise we fail loudly instead of shipping a known key.
+SECRET_KEY = os.getenv("SECRET_KEY", "dev-only-change-me" if DEBUG else "")
+if not SECRET_KEY:
+    raise ImproperlyConfigured("SECRET_KEY environment variable must be set when DEBUG is False.")
+
+ALLOWED_HOSTS = env_list("ALLOWED_HOSTS", "127.0.0.1,localhost")
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -28,6 +53,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -70,8 +96,14 @@ USE_I18N = True
 USE_TZ = True
 
 STATIC_URL = "static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
 MEDIA_URL = "media/"
 MEDIA_ROOT = BASE_DIR / "media"
+
+STORAGES = {
+    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+    "staticfiles": {"BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"},
+}
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 AUTH_USER_MODEL = "auth_app.User"
@@ -96,7 +128,23 @@ from core.fields import LocalDateTimeField  # noqa: E402
 
 ModelSerializer.serializer_field_mapping[_ModelDateTimeField] = LocalDateTimeField
 
-CORS_ALLOWED_ORIGINS = [
-    "http://127.0.0.1:5500",
-    "http://localhost:5500",
-]
+# Which frontend origins may call this API. Locally the Live Server default;
+# in production the frontend domain (e.g. https://svenhaase.de) via the env var.
+CORS_ALLOWED_ORIGINS = env_list(
+    "CORS_ALLOWED_ORIGINS", "http://127.0.0.1:5500,http://localhost:5500",
+)
+
+# Origins trusted for unsafe methods behind HTTPS (needed for the admin login).
+CSRF_TRUSTED_ORIGINS = env_list("CSRF_TRUSTED_ORIGINS", "")
+
+# Hardened settings that only apply in production (DEBUG=False). They assume the
+# app runs behind an nginx reverse proxy that terminates TLS and forwards
+# X-Forwarded-Proto, which is exactly the setup in DEPLOYMENT.md.
+if not DEBUG:
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_HSTS_SECONDS = 31536000
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True

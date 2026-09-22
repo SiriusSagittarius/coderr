@@ -1,0 +1,25 @@
+# systemd service that runs the Django backend with gunicorn.
+#
+# Install on the server with:
+#   sudo cp deploy/gunicorn.service /etc/systemd/system/coderr.service
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now coderr
+#
+# Adjust User and the /home/coderr/app paths if you use a different user or
+# directory. The .env file is read automatically by Django (python-dotenv),
+# so no EnvironmentFile line is needed here.
+
+[Unit]
+Description=Coderr Django backend (gunicorn)
+After=network.target
+
+[Service]
+User=coderr
+Group=www-data
+WorkingDirectory=/home/coderr/app
+ExecStart=/home/coderr/app/.venv/bin/gunicorn core.wsgi:application --bind 127.0.0.1:8000 --workers 3
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target
