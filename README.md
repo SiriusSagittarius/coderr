@@ -81,7 +81,7 @@ and settings boilerplate).
 - Orders are immutable snapshots of an `OfferDetail` at the time of booking;
   only their `status` field can later be changed by the business owner.
 - `db.sqlite3` and `media/` are intentionally excluded from version control
-  (see `.gitignore`); the database is regenerated locally via `migrate`.
+  (see `.gitignore`) ; the database is regenerated locally via `migrate`.
 - CORS is restricted to `http://127.0.0.1:5500` / `http://localhost:5500`
   for local frontend development — adjust `CORS_ALLOWED_ORIGINS` in
   `core/settings.py` for other setups.
